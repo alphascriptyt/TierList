@@ -52,7 +52,8 @@ class MainPage(tk.Frame):
 
         # fonts
         self.tier_font = "Helvecita"
-        self.button_font = (self.tier_font, 10)
+        self.title_font = (self.tier_font, 32)
+        self.button_font = (self.tier_font, 40) # standard font for the tiers
 
         # colours
         self.b1_colour = "#c95444" # tier colours NEED TO CHECK COLOURS
@@ -62,18 +63,74 @@ class MainPage(tk.Frame):
         self.b5_colour = "#00a2e8"
 
         self.colours = ["#c95444", "#ff8000", "#ffff00", "#b5e61d", "#00a2e8"]
+        self.standard_tiers = ["S", "A", "B", "C", "D"]
+
+        # widgets
+        self.title = tk.Label(self, text="My Tier List", font=self.title_font, bg=self.controller.bg_colour, fg="white", borderwidth=0, cursor="hand2")
+        self.title.bind("<Button-1>", self.edit_title)
+        self.title.place(x=5, y=5, width=890, height=92)
 
         # create side buttons, dims = 165x75
         self.buttons = []
 
         for i in range(len(self.colours)):
-            button = tk.Button(self, text="", font=self.button_font, bg=self.colours[i], command=lambda i=i: self.edit_tier(self.buttons[i]), relief="flat", wraplength=192)
+            button = tk.Label(self, text=self.standard_tiers[i], font=self.button_font, bg=self.colours[i], wraplength=192, cursor="hand2")
+            button.bind("<Button-1>", lambda event, i=i: self.edit_tier(event, self.buttons[i]))
+
             button.place(x=6, y=(i*80)+104, width=192, height=72) # button is 75 pixels high and title portion is 100 deep + line width of 2 pixels for each line.
             self.buttons.append(button)
- 
-    def edit_tier(self, button):
+
+    def edit_title(self, event):
+        ConfigureTitle(self)
+
+    def edit_tier(self, event, button):
         ConfigureTier(self, button) # raise the class to configure the title of the box
-     
+ 
+class ConfigureTitle(tk.Toplevel):
+    def __init__(self, controller):
+        #initialise toplevel
+        tk.Toplevel.__init__(self) 
+        self.controller = controller
+            
+        # font
+        self.title_font = (self.controller.tier_font, 28)
+        self.button_font = (self.controller.tier_font, 18)
+        self.input_font = (self.controller.tier_font, 10)
+
+        # basic setup
+        self.title("Configuring Title")
+        self.geometry("400x300") 
+        self.configure(bg=self.controller.controller.bg_colour)
+        self.resizable(0, 0)
+
+        # widgets
+        title = tk.Label(self, text="Title:", bg=self.controller.controller.bg_colour, fg="white", font=self.title_font)
+        title.place(x=105, y=15) 
+        
+        self.name_entry = tk.Text(self, width=30, height=4, font=self.input_font)
+        self.name_entry.insert(1.0, self.controller.title["text"])
+        self.name_entry.place(x=90, y=75)
+
+        apply_button = tk.Button(self, text="Apply", font=self.button_font, fg="green", bg=self.controller.controller.bg_colour, command=lambda: self.save())
+        apply_button.place(x=50, y=200)
+    
+        cancel_button = tk.Button(self, text="Cancel", font=self.button_font, fg="red", bg=self.controller.controller.bg_colour, command=lambda: self.destroy())
+        cancel_button.place(x=250, y=200)
+        
+    def save(self):
+        new_title = self.name_entry.get(1.0, "end-1c")
+        size = len(new_title)
+
+        if size < 48:
+            self.controller.title.configure(text=new_title)
+            self.destroy()
+
+        else:
+            new_title = "The given tier name was too large,\nlimit=48 chars." 
+
+            self.name_entry.delete(1.0, "end")
+            self.name_entry.insert(1.0, new_title)
+            
 class ConfigureTier(tk.Toplevel):
     def __init__(self, controller, button):
         #initialise toplevel
@@ -82,29 +139,32 @@ class ConfigureTier(tk.Toplevel):
         self.button = button
             
         # font
-        self.title_font = (self.controller.tier_font, 18)
-        self.button_font = (self.controller.tier_font, 14)
-        self.input_font = (self.controller.tier_font, 12)
+        self.title_font = (self.controller.tier_font, 28)
+        self.button_font = (self.controller.tier_font, 18)
+        self.input_font = (self.controller.tier_font, 10)
 
         # basic setup
-        self.title("Configuring Box")
+        self.title("Configuring Tier")
         self.geometry("400x300") 
         self.configure(bg=self.controller.controller.bg_colour)
         self.resizable(0, 0)
 
         # widgets
-        title = tk.Label(self, text="What would you like\nto rename the tier?", bg=self.controller.controller.bg_colour, fg="white", font=self.title_font)
-        title.place(x=45, y=15)
-
-        self.name_var = tk.StringVar()
-        name_entry = tk.Entry(self, textvariable=self.name_var, font=self.input_font)
-        name_entry.place(x=25, y=100)
+        title = tk.Label(self, text="Tier Name:", bg=self.controller.controller.bg_colour, fg="white", font=self.title_font)
+        title.place(x=105, y=15) 
         
+        self.name_entry = tk.Text(self, width=30, height=4, font=self.input_font)
+        self.name_entry.insert(1.0, self.button["text"])
+        self.name_entry.place(x=90, y=75)
+
         apply_button = tk.Button(self, text="Apply", font=self.button_font, fg="green", bg=self.controller.controller.bg_colour, command=lambda: self.save())
         apply_button.place(x=50, y=200)
+    
+        cancel_button = tk.Button(self, text="Cancel", font=self.button_font, fg="red", bg=self.controller.controller.bg_colour, command=lambda: self.destroy())
+        cancel_button.place(x=250, y=200)
         
     def save(self):
-        tier_name = self.name_var.get()
+        tier_name = self.name_entry.get(1.0, "end-1c")
         size = len(tier_name)
 
         if size < 121:
@@ -113,12 +173,14 @@ class ConfigureTier(tk.Toplevel):
 
             else:
                 font_size = 10 
+            
+            self.button.configure(text=tier_name, font=(self.controller.tier_font, font_size))
+            self.destroy()
 
         else:
-            tier_name = "The given tier name was too large, limit=120 chars."
-
-        self.button.configure(text=tier_name, font=(self.controller.tier_font, font_size))
-        self.destroy()
-
+            tier_name = "The given tier name was too large,\nlimit=120 chars."
+            self.name_entry.delete(1.0, "end")
+            self.name_entry.insert(1.0, tier_name)
+            
 gui = GUI()
 gui.mainloop()
