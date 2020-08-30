@@ -104,6 +104,7 @@ class MainPage(tk.Frame):
 
         label.place(x=500, y=500) # calculate position
         
+    # drag functions copied from stackoverflow, change to tkinter dnd?
     def make_draggable(self, widget): # make into class???? 
         widget.bind("<Button-1>", self.on_drag_start)
         widget.bind("<B1-Motion>", self.on_drag_motion)
