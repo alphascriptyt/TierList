@@ -1,6 +1,8 @@
 import tkinter as tk
+from tkinter import filedialog
 import os
 import sys
+from PIL import Image
 
 class GUI(tk.Tk):
     def __init__(self):
@@ -21,7 +23,7 @@ class GUI(tk.Tk):
         self.frames = {"MAIN" : MainPage(container, self)}
 
         self.frames["MAIN"].tkraise()
-   
+
     def initialise_frame(self, frame_object, image=None): # for all the basic setup stuff in frames
         frame_object.place(x=0, y=0, width=900, height=700) # set the frame in position
         frame_object.configure(bg=self.bg_colour) # set the background to black
@@ -37,7 +39,7 @@ class GUI(tk.Tk):
         try:
             # PyInstaller creates a temp folder and stores path in _MEIPASS
             base_path = sys._MEIPASS
-            
+
         except Exception:
             base_path = os.path.abspath(".")
 
@@ -66,9 +68,15 @@ class MainPage(tk.Frame):
         self.standard_tiers = ["S", "A", "B", "C", "D"]
 
         # widgets
-        self.title = tk.Label(self, text="My Tier List", font=self.title_font, bg=self.controller.bg_colour, fg="white", borderwidth=0, cursor="hand2")
+        self.title = tk.Label(self, text="My Tier List", font=self.title_font, bg=self.controller.bg_colour, fg="white", cursor="hand2")
         self.title.bind("<Button-1>", self.edit_title)
         self.title.place(x=5, y=5, width=890, height=92)
+
+        # load images
+        self.loaded_images = []
+
+        self.load_button = tk.Button(self, text="LOAD", command=lambda: self.load_image(), font=self.title_font, fg="green", bg=self.controller.bg_colour, cursor="hand2")
+        self.load_button.place(x=700, y=600)
 
         # create side buttons, dims = 165x75
         self.buttons = []
@@ -79,6 +87,37 @@ class MainPage(tk.Frame):
 
             button.place(x=6, y=(i*80)+104, width=192, height=72) # button is 75 pixels high and title portion is 100 deep + line width of 2 pixels for each line.
             self.buttons.append(button)
+    
+    def load_image(self): # load and format image for label
+        image_dir = filedialog.askopenfilename(initialdir=os.getcwd(), title="Load Image", filetypes=(("GIF Images", ".gif"),)) # load .gif
+        resized_dir = image_dir[:-4] + "_resized.gif" 
+
+        resized = Image.open(image_dir).resize((100, 75))
+        resized.save(resized_dir)
+        
+        image = tk.PhotoImage(file=resized_dir)
+        label = tk.Label(self, image=image, borderwidth=0, highlightthickness=0)
+        label.image = image
+
+        self.make_draggable(label)
+        self.loaded_images.append(label)
+
+        label.place(x=500, y=500) # calculate position
+        
+    def make_draggable(self, widget): # make into class???? 
+        widget.bind("<Button-1>", self.on_drag_start)
+        widget.bind("<B1-Motion>", self.on_drag_motion)
+
+    def on_drag_start(self, event):
+        widget = event.widget
+        widget._drag_start_x = event.x
+        widget._drag_start_y = event.y
+
+    def on_drag_motion(self, event):
+        widget = event.widget
+        x = widget.winfo_x() - widget._drag_start_x + event.x
+        y = widget.winfo_y() - widget._drag_start_y + event.y
+        widget.place(x=x, y=y)
 
     def edit_title(self, event):
         ConfigureTitle(self)
