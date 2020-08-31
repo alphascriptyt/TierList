@@ -73,7 +73,7 @@ class MainPage(tk.Frame):
         self.title.place(x=5, y=5, width=890, height=92)
 
         # load images
-        self.loaded_images = []
+        #self.loaded_images = []
 
         self.load_button = tk.Button(self, text="LOAD", command=lambda: self.load_image(), font=self.title_font, fg="green", bg=self.controller.bg_colour, cursor="hand2")
         self.load_button.place(x=700, y=600)
@@ -90,22 +90,30 @@ class MainPage(tk.Frame):
     
     def load_image(self): # load and format image for label
         image_dir = filedialog.askopenfilename(initialdir=os.getcwd(), title="Load Image", filetypes=(("GIF Images", ".gif"),)) # load .gif
-        resized_dir = image_dir[:-4] + "_resized.gif" 
 
-        resized = Image.open(image_dir).resize((100, 75))
-        resized.save(resized_dir)
+        if image_dir == "": # if filedialog is closed, ignore
+            return
+
+        resized_dir = image_dir[:-4] + "_resized.gif" 
         
-        image = tk.PhotoImage(file=resized_dir)
+        if not image_dir[:-4].endswith("_resized"): # check if file is already made
+            resized = Image.open(image_dir).resize((100, 73)) # slightly less than height to allow for error
+            resized.save(resized_dir)
+            
+            image = tk.PhotoImage(file=resized_dir)
+
+        else:
+            image = tk.PhotoImage(file=image_dir)
+
         label = tk.Label(self, image=image, borderwidth=0, highlightthickness=0)
         label.image = image
+        label.place(x=400, y=565)
 
         self.make_draggable(label)
-        self.loaded_images.append(label)
-
-        label.place(x=500, y=500) # calculate position
+        #self.loaded_images.append(label)
         
     # drag functions copied from stackoverflow, change to tkinter dnd?
-    def make_draggable(self, widget): # make into class???? 
+    def make_draggable(self, widget): 
         widget.bind("<Button-1>", self.on_drag_start)
         widget.bind("<B1-Motion>", self.on_drag_motion)
 
@@ -118,6 +126,24 @@ class MainPage(tk.Frame):
         widget = event.widget
         x = widget.winfo_x() - widget._drag_start_x + event.x
         y = widget.winfo_y() - widget._drag_start_y + event.y
+
+        # fix position between borders if placed there, hardcoded because why not 
+        if 99 < y < 505 and 204 < x < 797:
+            if y < 180:
+                y = 102
+            
+            elif y < 260:
+                y = 180
+
+            elif y < 340:
+                y = 260
+
+            elif y < 420:
+                y = 340
+
+            else:
+                y = 420
+        
         widget.place(x=x, y=y)
 
     def edit_title(self, event):
@@ -152,7 +178,7 @@ class ConfigureTitle(tk.Toplevel):
         self.name_entry.place(x=90, y=75)
 
         apply_button = tk.Button(self, text="Apply", font=self.button_font, fg="green", bg=self.controller.controller.bg_colour, command=lambda: self.save())
-        apply_button.place(x=50, y=200)
+        apply_button.place(x=65, y=200)
     
         cancel_button = tk.Button(self, text="Cancel", font=self.button_font, fg="red", bg=self.controller.controller.bg_colour, command=lambda: self.destroy())
         cancel_button.place(x=250, y=200)
