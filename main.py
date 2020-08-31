@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import filedialog
+from tkinter import messagebox
 import os
 import sys
 from PIL import Image
@@ -182,10 +183,7 @@ class ConfigureTitle(tk.Toplevel):
             self.destroy()
 
         else:
-            new_title = "The given tier name was too large,\nlimit=48 chars." 
-
-            self.name_entry.delete(1.0, "end")
-            self.name_entry.insert(1.0, new_title)
+            messagebox.showerror(title="Error configuring title", message="The given title was too large, limit=48 chars.")
             
 class ConfigureTier(tk.Toplevel):
     def __init__(self, controller, button):
@@ -234,9 +232,7 @@ class ConfigureTier(tk.Toplevel):
             self.destroy()
 
         else:
-            tier_name = "The given tier name was too large,\nlimit=120 chars."
-            self.name_entry.delete(1.0, "end")
-            self.name_entry.insert(1.0, tier_name)
-            
+            messagebox.showerror(title="Error configuring tier", message="The given tier name was too large, limit=120 chars.")
+
 gui = GUI()
 gui.mainloop()
