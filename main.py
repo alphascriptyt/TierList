@@ -37,9 +37,8 @@ class GUI(tk.Tk):
     def resource_path(self, relative_path): # copied from stackoverflow xD 
         """ Get absolute path to resource, works for dev and for PyInstaller """
         try:
-            # PyInstaller creates a temp folder and stores path in _MEIPASS
-            base_path = sys._MEIPASS
-
+            base_path = sys._MEIPASS # PyInstaller creates a temp folder and stores path in _MEIPASS
+            
         except Exception:
             base_path = os.path.abspath(".")
 
@@ -58,12 +57,6 @@ class MainPage(tk.Frame):
         self.button_font = (self.tier_font, 40) # standard font for the tiers
 
         # colours
-        self.b1_colour = "#c95444" # tier colours NEED TO CHECK COLOURS
-        self.b2_colour = "#ff8000" # only store here temporarily
-        self.b3_colour = "#ffff00"
-        self.b4_colour = "#b5e61d"
-        self.b5_colour = "#00a2e8"
-
         self.colours = ["#c95444", "#ff8000", "#ffff00", "#b5e61d", "#00a2e8"]
         self.standard_tiers = ["S", "A", "B", "C", "D"]
 
@@ -73,8 +66,6 @@ class MainPage(tk.Frame):
         self.title.place(x=5, y=5, width=890, height=92)
 
         # load images
-        #self.loaded_images = []
-
         self.load_button = tk.Button(self, text="LOAD", command=lambda: self.load_image(), font=self.title_font, fg="green", bg=self.controller.bg_colour, cursor="hand2")
         self.load_button.place(x=700, y=600)
 
@@ -110,9 +101,8 @@ class MainPage(tk.Frame):
         label.place(x=400, y=565)
 
         self.make_draggable(label)
-        #self.loaded_images.append(label)
         
-    # drag functions copied from stackoverflow, change to tkinter dnd?
+    # drag functions copied from stackoverflow 
     def make_draggable(self, widget): 
         widget.bind("<Button-1>", self.on_drag_start)
         widget.bind("<B1-Motion>", self.on_drag_motion)
