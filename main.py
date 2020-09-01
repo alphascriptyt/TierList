@@ -12,12 +12,18 @@ class GUI(tk.Tk):
 
         # colours
         self.bg_colour = "#151515"
+        
+        # standard font
+        self.tier_font = "Helvecita"
 
         # basic setup
         self.title("Tier List")
         self.geometry("900x700") 
         self.configure(bg=self.bg_colour)
         self.resizable(0, 0)
+
+        # settings
+        self.image_width = 100
 
         # frames (not necessary but allows for multiple frames)
         container = tk.Frame(self)
@@ -55,10 +61,9 @@ class MainPage(tk.Frame):
         self.controller.initialise_frame(self, "background_colours.gif")
 
         # fonts
-        self.tier_font = "Helvecita"
-        self.text_font = (self.tier_font, 14)
-        self.title_font = (self.tier_font, 32)
-        self.button_font = (self.tier_font, 40) # standard font for the tiers
+        self.text_font = (self.controller.tier_font, 14)
+        self.title_font = (self.controller.tier_font, 32)
+        self.button_font = (self.controller.tier_font, 40) # standard font for the tiers
 
         # colours
         self.colours = ["#c95444", "#ff8000", "#ffff00", "#b5e61d", "#00a2e8"]
@@ -100,7 +105,7 @@ class MainPage(tk.Frame):
         resized_dir = image_dir[:-4] + "_resized.gif" 
         
         if not image_dir[:-4].endswith("_resized"): # check if file is already made
-            resized = Image.open(image_dir).resize((100, 73)) # slightly less than height to allow for error
+            resized = Image.open(image_dir).resize((self.controller.image_width, 73)) # slightly less than height to allow for error
             resized.save(resized_dir)
             
             image = tk.PhotoImage(file=resized_dir)
@@ -159,10 +164,32 @@ class SettingsPage(tk.Frame):
         #initialise 
         tk.Frame.__init__(self, parent) 
         self.controller = controller
-        self.controller.initialise_frame(self)#, "background_colours.gif")
+        self.controller.initialise_frame(self, "settings_background.gif")
 
+        # fonts
+        self.input_font = (self.controller.tier_font, 32)
+        self.button_font = (self.controller.tier_font, 24)
 
+        # widgets
+        self.width_var = tk.StringVar()
+        self.width_var.set("100")
+        width = tk.Entry(self, textvariable=self.width_var, width=10, font=self.input_font)
+        width.place(x=325, y=400)
 
+        apply_button = tk.Button(self, text="APPLY", command=lambda: self.save(), font=self.button_font, fg="green", bg=self.controller.bg_colour, cursor="hand2")
+        apply_button.place(x=600, y=600)
+
+        cancel_button = tk.Button(self, text="CANCEL", command=lambda: self.controller.frames["MAIN"].tkraise(), font=self.button_font, fg="red", bg=self.controller.bg_colour, cursor="hand2")
+        cancel_button.place(x=165, y=600)
+
+    def save(self):
+        width = self.width_var.get()
+        if width.isdigit():
+            self.controller.image_width = int(width)
+            self.controller.frames["MAIN"].tkraise()
+
+        else:
+            messagebox.showerror(title="Settings Update Failure", message="The width you entered was of an invalid data type. Please only enter positive integers.")
 
 class ConfigureTitle(tk.Toplevel):
     def __init__(self, controller):
@@ -171,9 +198,9 @@ class ConfigureTitle(tk.Toplevel):
         self.controller = controller
             
         # font
-        self.title_font = (self.controller.tier_font, 28)
-        self.button_font = (self.controller.tier_font, 18)
-        self.input_font = (self.controller.tier_font, 10)
+        self.title_font = (self.controller.controller.tier_font, 28)
+        self.button_font = (self.controller.controller.tier_font, 18)
+        self.input_font = (self.controller.controller.tier_font, 10)
 
         # basic setup
         self.title("Configuring Title")
@@ -183,7 +210,7 @@ class ConfigureTitle(tk.Toplevel):
 
         # widgets
         title = tk.Label(self, text="Title:", bg=self.controller.controller.bg_colour, fg="white", font=self.title_font)
-        title.place(x=105, y=15) 
+        title.place(x=160, y=15) 
         
         self.name_entry = tk.Text(self, width=30, height=4, font=self.input_font)
         self.name_entry.insert(1.0, self.controller.title["text"])
@@ -204,7 +231,7 @@ class ConfigureTitle(tk.Toplevel):
             self.destroy()
 
         else:
-            messagebox.showerror(title="Error configuring title", message="The given title was too large, limit=48 chars.")
+            messagebox.showerror(title="Title Configuration Error", message="The given title was too large, limit=48 chars.")
             
 class ConfigureTier(tk.Toplevel):
     def __init__(self, controller, button):
@@ -214,9 +241,9 @@ class ConfigureTier(tk.Toplevel):
         self.button = button
             
         # font
-        self.title_font = (self.controller.tier_font, 28)
-        self.button_font = (self.controller.tier_font, 18)
-        self.input_font = (self.controller.tier_font, 10)
+        self.title_font = (self.controller.controller.tier_font, 28)
+        self.button_font = (self.controller.controller.tier_font, 18)
+        self.input_font = (self.controller.controller.tier_font, 10)
 
         # basic setup
         self.title("Configuring Tier")
@@ -253,7 +280,7 @@ class ConfigureTier(tk.Toplevel):
             self.destroy()
 
         else:
-            messagebox.showerror(title="Error configuring tier", message="The given tier name was too large, limit=120 chars.")
+            messagebox.showerror(title="Tier Configuration Error", message="The given tier name was too large, limit=120 chars.")
 
 gui = GUI()
 gui.mainloop()
