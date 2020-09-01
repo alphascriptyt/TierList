@@ -1,8 +1,9 @@
+import sys
+import os
 import tkinter as tk
+import webbrowser
 from tkinter import filedialog
 from tkinter import messagebox
-import os
-import sys
 from PIL import Image
 
 class GUI(tk.Tk):
@@ -21,7 +22,8 @@ class GUI(tk.Tk):
         # frames (not necessary but allows for multiple frames)
         container = tk.Frame(self)
         container.place(x=0, y=0, width=900, height=700)
-        self.frames = {"MAIN" : MainPage(container, self)}
+        self.frames = {"MAIN" : MainPage(container, self),
+                       "SETTINGS" : SettingsPage(container, self)}
 
         self.frames["MAIN"].tkraise()
 
@@ -54,6 +56,7 @@ class MainPage(tk.Frame):
 
         # fonts
         self.tier_font = "Helvecita"
+        self.text_font = (self.tier_font, 14)
         self.title_font = (self.tier_font, 32)
         self.button_font = (self.tier_font, 40) # standard font for the tiers
 
@@ -68,7 +71,15 @@ class MainPage(tk.Frame):
 
         # load images
         self.load_button = tk.Button(self, text="LOAD", command=lambda: self.load_image(), font=self.title_font, fg="green", bg=self.controller.bg_colour, cursor="hand2")
-        self.load_button.place(x=700, y=600)
+        self.load_button.place(x=720, y=600)
+
+        # settings
+        self.settings_button = tk.Button(self, text="SETTINGS", command=lambda: self.controller.frames["SETTINGS"].tkraise(), font=self.title_font, fg="grey", bg=self.controller.bg_colour, cursor="hand2")
+        self.settings_button.place(x=440, y=600)
+
+        # youtube
+        youtube_plug = tk.Button(self, text="youtube.com/alphascript", command=lambda: webbrowser.open_new("https://www.youtube.com/alphascript"), font=self.text_font, fg="red", bg=self.controller.bg_colour, cursor="pirate", relief="sunken", highlightthickness=0, borderwidth=0)
+        youtube_plug.place(x=5, y=660)
 
         # create side buttons, dims = 165x75
         self.buttons = []
@@ -97,7 +108,7 @@ class MainPage(tk.Frame):
         else:
             image = tk.PhotoImage(file=image_dir)
 
-        label = tk.Label(self, image=image, borderwidth=0, highlightthickness=0)
+        label = tk.Label(self, image=image, cursor="fleur", borderwidth=0, highlightthickness=0)
         label.image = image
         label.place(x=400, y=565)
 
@@ -142,7 +153,17 @@ class MainPage(tk.Frame):
 
     def edit_tier(self, event, button):
         ConfigureTier(self, button) # raise the class to configure the title of the box
- 
+
+class SettingsPage(tk.Frame):
+    def __init__(self, parent, controller):
+        #initialise 
+        tk.Frame.__init__(self, parent) 
+        self.controller = controller
+        self.controller.initialise_frame(self)#, "background_colours.gif")
+
+
+
+
 class ConfigureTitle(tk.Toplevel):
     def __init__(self, controller):
         #initialise toplevel
